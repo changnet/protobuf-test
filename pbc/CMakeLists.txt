@@ -63,6 +63,7 @@ target_link_libraries(pbctest PRIVATE
     lua
     pbc
     stdc++fs
+    dl
 )
 
 add_test(lua-protobuf_perf test test_ext.lua)

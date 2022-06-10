@@ -549,7 +549,105 @@ int32_t lprotobuf::raw_encode(lua_State *L, struct pbc_wmessage *wmsg,
     return 0;
 }
 
+///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+// 临时存一些数据用于测试
+lprotobuf *lpb = nullptr;
+static size_t len = 0;
+static char buff[10240];
+
+static int init(lua_State* L)
+{
+    lpb = new lprotobuf();
+    return 0;
+}
+
+static int load(lua_State* L)
+{
+    const char* filename = luaL_checkstring(L, 1);
+    lpb->load_file(filename);
+    return 0;
+}
+
+int encode_test(lua_State* L)
+{
+    const char* object = luaL_checkstring(L, 1);
+    if (lpb->encode(L, object, 2) < 0)
+    {
+        ELOG("protobuf encode:%s", lpb->last_error());
+        return -1;
+    }
+    return 0;
+}
+
+int decode_test(lua_State* L)
+{
+    // 为了模拟数据从socket接收，这里直接从上一次encode的buffer取数据，不从lua
+    // 那边取数据
+
+    const char* object = luaL_checkstring(L, 1);
+    if (lpb->decode(L, object, buff, len) < 0)
+    {
+        ELOG("protobuf decode:%s", lpb->last_error());
+        return -1;
+    }
+
+    // 默认情况下，所有内容解析到一个table
+    return 1;
+
+    return 1;
+}
+
+int encode_and_save(lua_State* L)
+{
+    const char* object = luaL_checkstring(L, 1);
+    if (lpb->encode(L, object, 2) < 0)
+    {
+        ELOG("protobuf encode:%s", lpb->last_error());
+        return -1;
+    }
+    
+    struct pbc_slice slice;
+    lpb->get_buffer(slice);
+
+    len = slice.len;
+    memcpy(buff, slice.buffer, len);
+    return 0;
+}
+
+int luaopen_pbext(lua_State* L)
+{
+    luaL_Reg libs[] = {
+        {"init", init},
+        {"load", load},
+        {"encode_and_save", encode_and_save},
+        { "encode", encode_test },
+        { "decode", decode_test },
+        { NULL, NULL }
+    };
+    luaL_newlib(L, libs);
+    return 1;
+}
+
 int main()
 {
+
+    lua_State* L = luaL_newstate();
+
+    luaL_openlibs(L);
+
+    luaL_requiref(L, "pb_ext", luaopen_pbext, 1);
+    lua_pop(L, 1);  /* remove lib */
+
+    int e = luaL_dofile(L, "test_ext.lua");
+    if (e)
+    {
+        printf("ERROR: %s", lua_tostring(L, lua_gettop(L)));
+    }
+
+    lua_close(L);
+
     return 0;
 }
