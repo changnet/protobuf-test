@@ -26,3 +26,20 @@ gcc -g -o test test.c pb.c -llua -ldl -lm
 echo "run release lua-protobuf test"
 gcc -O3 -DNDEBUG -o test test.c pb.c -llua -ldl -lm
 ./test
+
+echo "run debug protolua test"
+cd ../protolua
+cd thirdparty
+git clone https://github.com/google/protobuf.git
+cd ..
+cmake . -DCMAKE_BUILD_TYPE=Debug
+make
+cd protolua
+./protolua
+
+echo "run release protolua test"
+cd ..
+cmake . -DCMAKE_BUILD_TYPE=Release
+make
+cd protolua
+./protolua
