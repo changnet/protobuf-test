@@ -567,8 +567,10 @@ static int init(lua_State* L)
 static int load(lua_State* L)
 {
     const char* filename = luaL_checkstring(L, 1);
-    lpb->load_file(filename);
-    return 0;
+    int e = lpb->load_file(filename);
+    
+    lua_pushboolean(L, 0 == e);
+    return 1;
 }
 
 int encode_test(lua_State* L)
@@ -595,8 +597,6 @@ int decode_test(lua_State* L)
     }
 
     // 默认情况下，所有内容解析到一个table
-    return 1;
-
     return 1;
 }
 
