@@ -25,6 +25,7 @@
 
 运行`test.sh`执行测试，不同开发环境可能需要做些调整
 
+```text
 run debug pbc test
 run 100000 times encode decode cost 0.386s
 {id = 18,phone = {1 = {number = "12312341234"},2 = {type = "WORK",number = "45645674567"}},name = "ilse",email = "888888888@github.com"}
@@ -45,6 +46,7 @@ run 100000 times encode decode cost 2.841s
 run release protolua test
 run 100000 times encode decode cost 0.743s
 {name = "ilse",email = "888888888@github.com",phone = {1 = {type = 0,number = "12312341234"},2 = {type = 2,number = "45645674567"}},id = 18}
+```
 
 ## 简单总结
 
