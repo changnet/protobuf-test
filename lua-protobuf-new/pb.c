@@ -7,15 +7,9 @@
 # pragma warning(disable: 4127) /* const in if condition */
 #endif
 
-#define PB_STATIC_API
-#include "pb.h"
+#include "lpb.h"
 
 PB_NS_BEGIN
-
-
-#define LUA_LIB
-#include <lua.h>
-#include <lauxlib.h>
 
 
 #include <stdio.h>
@@ -131,24 +125,6 @@ static const char state_name[] = PB_STATE;
 enum lpb_Int64Mode { LPB_NUMBER, LPB_STRING, LPB_HEXSTRING };
 enum lpb_DefMode   { LPB_DEFDEF, LPB_COPYDEF, LPB_METADEF, LPB_NODEF };
 
-typedef struct lpb_State {
-    const pb_State *state;
-    pb_State  local;
-    pb_Cache  cache;
-    pb_Buffer buffer;
-    int defs_index;
-    int enc_hooks_index;
-    int dec_hooks_index;
-    unsigned use_hooks     : 1; /* lpb_Int64Mode */
-    unsigned enum_as_value : 1;
-    unsigned default_mode  : 2; /* lpb_DefMode */
-    unsigned int64_mode    : 2; /* lpb_Int64Mode */
-    unsigned encode_default_values  : 1;
-    unsigned decode_default_array   : 1;
-    unsigned decode_default_message : 1;
-    unsigned encode_order  : 1;
-} lpb_State;
-
 static int lpb_reftable(lua_State *L, int ref) {
     if (ref != LUA_NOREF) {
         lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
@@ -185,7 +161,7 @@ static int Lpb_delete(lua_State *L) {
     return 0;
 }
 
-static lpb_State *default_lstate(lua_State *L) {
+lpb_State *default_lstate(lua_State *L) {
     lpb_State *LS;
     if (lua53_rawgetp(L, LUA_REGISTRYINDEX, state_name) == LUA_TUSERDATA) {
         LS = (lpb_State*)lua_touserdata(L, -1);
@@ -275,7 +251,7 @@ static pb_Slice lpb_toslice(lua_State *L, int idx) {
     return pb_slice(NULL);
 }
 
-static pb_Slice lpb_checkslice(lua_State *L, int idx) {
+pb_Slice lpb_checkslice(lua_State *L, int idx) {
     pb_Slice ret = lpb_toslice(L, idx);
     if (ret.p == NULL) typeerror(L, idx, "string/buffer/slice");
     return ret;
@@ -1173,7 +1149,7 @@ LUALIB_API int luaopen_pb_slice(lua_State *L) {
 
 static int lpb_pushdeffield(lua_State *L, lpb_State *LS, const pb_Field *f, int is_proto3);
 
-static const pb_Type *lpb_type(lpb_State *LS, pb_Slice s) {
+const pb_Type *lpb_type(lpb_State *LS, pb_Slice s) {
     const pb_Type *t;
     if (s.p == NULL || *s.p == '.')
         t = pb_type(lpb_state(LS), lpb_name(LS, s));
@@ -1523,15 +1499,6 @@ static int Lpb_typefmt(lua_State *L) {
 
 /* protobuf encode */
 
-typedef struct lpb_Env {
-    lua_State *L;
-    lpb_State *LS;
-    pb_Buffer *b;
-    pb_Slice *s;
-} lpb_Env;
-
-static void lpb_encode (lpb_Env *e, const pb_Type *t);
-
 static void lpb_checktable(lua_State *L, const pb_Field *f) {
     argcheck(L, lua_istable(L, -1),
             2, "table expected at field '%s', got %s",
@@ -1662,7 +1629,7 @@ static void lpb_encode_onefield(lpb_Env *e, const pb_Type *t, const pb_Field *f)
         lpbE_tagfield(e, f, t->is_proto3 && !f->oneof_idx);
 }
 
-static void lpb_encode(lpb_Env *e, const pb_Type *t) {
+void lpb_encode(lpb_Env *e, const pb_Type *t) {
     lua_State *L = e->L;
     luaL_checkstack(L, 3, "message too many levels");
     if (e->LS->encode_order) {
@@ -1710,8 +1677,6 @@ static int Lpb_encode(lua_State *L) {
 
 #define lpb_withinput(e,ns,stmt) ((e)->s = (ns), (stmt), (e)->s = s)
 
-static int lpbD_message(lpb_Env *e, const pb_Type *t);
-
 static void lpb_usedechooks(lua_State *L, lpb_State *LS, const pb_Type *t) {
     lpb_pushdechooktable(L, LS);
     if (lua53_rawgetp(L, -1, t) != LUA_TNIL) {
@@ -1725,7 +1690,7 @@ static void lpb_usedechooks(lua_State *L, lpb_State *LS, const pb_Type *t) {
     lua_pop(L, 2);
 }
 
-static void lpb_pushtypetable(lua_State *L, lpb_State *LS, const pb_Type *t) {
+void lpb_pushtypetable(lua_State *L, lpb_State *LS, const pb_Type *t) {
     int mode = LS->default_mode;
     switch (t->is_proto3 && mode == LPB_DEFDEF ? LPB_COPYDEF : mode) {
     case LPB_COPYDEF:
@@ -1843,7 +1808,7 @@ static void lpbD_repeated(lpb_Env *e, const pb_Field *f, uint32_t tag) {
     }
 }
 
-static int lpbD_message(lpb_Env *e, const pb_Type *t) {
+int lpbD_message(lpb_Env *e, const pb_Type *t) {
     lua_State *L = e->L;
     pb_Slice *s = e->s;
     uint32_t tag;

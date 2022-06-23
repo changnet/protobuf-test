@@ -2,8 +2,11 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
-#include "pb_ext.h"
 #include <stdio.h>
+
+#include "pb_ext.h"
+
+int luaopen_pb(lua_State* L);
 
 int main()
 {
@@ -11,7 +14,9 @@ int main()
 
     luaL_openlibs(L);
 
-    // luaopen_pbext(L);
+    luaL_requiref(L, "pb", luaopen_pb, 1);
+    lua_pop(L, 1);  /* remove lib */
+
     luaL_requiref(L, "pb_ext", luaopen_pbext, 1);
     lua_pop(L, 1);  /* remove lib */
 

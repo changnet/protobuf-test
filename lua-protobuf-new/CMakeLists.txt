@@ -55,7 +55,7 @@ target_link_libraries(pb PRIVATE
 
 project(lua-protobuf-test C)
 
-add_executable (test test.c pb.c)
+add_executable (test test.c pb.c pb_ext.c)
 
 target_include_directories(test PRIVATE
     ${LUA_INCLUDE_DIR}
