@@ -8,15 +8,6 @@
 
 PB_NS_BEGIN
 
-
-
-/**
- * @brief 获取lpb_State，因为lpb_State结构不在pb.h声明，只能用void指针替代
- * @param L lua虚拟机
- * @return 
-*/
-void* lext_state(lua_State* L);
-
 /**
  * @brief 把lua table打包到缓冲区中
  * @param LS lpb_State指针

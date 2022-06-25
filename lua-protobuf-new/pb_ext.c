@@ -4,11 +4,6 @@
 
 PB_NS_BEGIN
 
-void* Lext_state(lua_State* L)
-{
-    return default_lstate(L);
-}
-
 int Lext_encode(void* LS, lua_State* L, int index, pb_Buffer *b)
 {
     // Lpb_encode(L);
@@ -51,7 +46,7 @@ static char buff[10240];
 
 int init(lua_State* L)
 {
-    __LS = Lext_state(L);
+    __LS = default_lstate(L);
     return 0;
 }
 
