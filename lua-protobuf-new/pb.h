@@ -334,6 +334,7 @@ struct pb_Field {
 struct pb_Type {
     pb_Name    *name;
     const char *basename;
+    const pb_Field **field_sort;
     pb_Table field_tags;
     pb_Table field_names;
     pb_Table oneof_index;
@@ -1248,6 +1249,8 @@ PB_API void pb_deltype(pb_State *S, pb_Type *t) {
     pb_freetable(&t->oneof_index);
     t->oneof_field = 0, t->field_count = 0;
     t->is_dead = 1;
+    free((void *)t->field_sort);
+    t->field_sort = NULL;
     /*pb_delname(S, t->name); */
     /*pb_poolfree(&S->typepool, t); */
 }

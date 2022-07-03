@@ -79,16 +79,6 @@ run 100000 times encode decode cost 0.264s
 256ms / 100000 ~= 0.00256ms
 
 
-static int argcheck(lua_State *L, int cond, int idx, const char *fmt, ...) {
-    if (!cond) {
-        va_list l;
-        va_start(l, fmt);
-        lua_pushvfstring(L, fmt, l);
-        va_end(l);
-        return luaL_argerror(L, idx, lua_tostring(L, -1));
-    }
-    return 1;
-}
 
 lua_error
 luaL_error
@@ -138,4 +128,16 @@ static void lpbD_field(lpb_Env *e, const pb_Field *f, uint32_t tag)
 static void lpbD_rawfield(lpb_Env *e, const pb_Field *f)
 
 lpb_useenchooks 这个函数调用的地方感觉有点问题，正确的用法不应该是if (e->LS->use_hooks) lpb_usedechooks(L, e->LS, t);么
+
+pb_addvarint32等函数的返回值，完全忽略掉，作为一个基础库，这会导致用户难以查找问题
+
+pb_type和pb_nextfield等函数均返回const类型，导致pb_sortfield需要强转
+
+改动的函数：
+lpb_encode
+lpb_encode_onefield
+lpbE_map
+lpbE_repeated
+lpbE_tagfield
+lpbE_field
 ]]

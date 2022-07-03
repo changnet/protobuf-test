@@ -35,6 +35,8 @@ typedef struct lpb_Env {
     pb_Slice* s;
 } lpb_Env;
 
+#define pb_error_field "__pb_last_strerror"
+
 lpb_State* default_lstate(lua_State* L);
 
 void lpb_encode(lpb_Env* e, const pb_Type* t);
@@ -47,6 +49,62 @@ int lpbD_message(lpb_Env* e, const pb_Type* t);
 
 void lpb_pushtypetable(lua_State* L, lpb_State* LS, const pb_Type* t);
 
+inline void lpb_set_error(lua_State* L, const char* fmt, ...)
+{
+    va_list l;
+    va_start(l, fmt);
+    lua_pushvfstring(L, fmt, l);
+    va_end(l);
+
+    lua_setglobal(L, pb_error_field);
+}
+
+inline int lpb_error(lua_State* L) {
+    lua_getglobal(L, pb_error_field);
+
+    lua_pushnil(L);
+    lua_setglobal(L, pb_error_field);
+
+    return lua_error(L);
+}
+
+inline int comp_field(const void* a, const void* b) {
+    return (*(const pb_Field**)a)->number - (*(const pb_Field**)b)->number;
+}
+
+PB_API const pb_Field* pb_sortfield(pb_Type* t) {
+    if (!t->field_sort && t->field_count) {
+        pb_Field** list = malloc(sizeof(pb_Field*) * t->field_count);
+
+        int index = 0;
+        const pb_Field* f = NULL;
+        while (pb_nextfield(t, &f)) {
+            list[index++] = (pb_Field*)f;
+        }
+
+        qsort(list, index, sizeof(pb_Field*), comp_field);
+        t->field_sort = list;
+    }
+
+    return t->field_sort ? *t->field_sort : NULL;
+}
+
+/*
+#define lpb_checkstack(L, n, msg)   \
+    do {if (!lua_checkstack(L, n)) lpb_error(L, msg);} while(0)
+
+#define lpb_checktable(L, f) \
+    do{\
+        if(!lua_istable(L, -1))\
+            lpb_error("table expected at field '%s', got %s",\
+            (const char*)f->name, luaL_typename(L, -1));\
+    } while (0)
+
+#define lpb_argcheck(L, cond, idx, fmt, ...) \
+    do {\
+        if (!cond) lpb_error(L, "bad argument #%d " fmt, idx, __VA_ARGS__);\
+    } while (0)
+*/
 PB_NS_END
 
 #endif /* lpb_h */

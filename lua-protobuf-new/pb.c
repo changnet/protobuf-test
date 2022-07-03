@@ -1672,6 +1672,37 @@ static int Lpb_encode(lua_State *L) {
     return 1;
 }
 
+static int lpb_pack_msg(lpb_Env* e, const pb_Type* t) {
+    const pb_Field* field = pb_sortfield((pb_Type*)t);
+    for (unsigned i = 0; i < t->field_count; i++) {
+
+    }
+
+    return 0;
+}
+
+static int Lpb_pack_msg(lua_State* L) {
+    lpb_State* LS = default_lstate(L);
+    const pb_Type* t = lpb_type(LS, lpb_checkslice(L, 1));
+
+    lpb_Env e;
+    e.L = L, e.LS = LS, e.b = test_buffer(L, 3);
+    if (e.b == NULL) pb_resetbuffer(e.b = &LS->buffer);
+
+    lua_pushvalue(L, 2);
+    lpb_useenchooks(L, e.LS, t);
+
+    if (lpb_pack_msg(&e, t)) return lpb_error(L);
+
+    if (e.b != &LS->buffer)
+        lua_settop(L, 3);
+    else {
+        lua_pushlstring(L, pb_buffer(e.b), pb_bufflen(e.b));
+        pb_resetbuffer(e.b);
+    }
+    return 1;
+}
+
 
 /* protobuf decode */
 
@@ -1861,6 +1892,10 @@ static int Lpb_decode(lua_State *L) {
             lpb_checkslice(L, 2), 3);
 }
 
+static int Lpb_unpack_msg(lua_State* L) {
+    return 0;
+}
+
 
 /* pb module interface */
 
@@ -1926,6 +1961,8 @@ LUALIB_API int luaopen_pb(lua_State *L) {
         ENTRY(result),
         ENTRY(option),
         ENTRY(state),
+        ENTRY(pack_msg),
+        ENTRY(unpack_msg),
 #undef  ENTRY
         { NULL, NULL }
     };
