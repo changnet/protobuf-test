@@ -39,7 +39,7 @@ typedef struct lpb_Env {
 
 lpb_State* default_lstate(lua_State* L);
 
-void lpb_encode(lpb_Env* e, const pb_Type* t);
+void lpb_encode(lpb_Env* e, const pb_Type* t, int idx);
 
 const pb_Type* lpb_type(lpb_State* LS, pb_Slice s);
 
@@ -66,27 +66,6 @@ inline int lpb_error(lua_State* L) {
     lua_setglobal(L, pb_error_field);
 
     return lua_error(L);
-}
-
-inline int comp_field(const void* a, const void* b) {
-    return (*(const pb_Field**)a)->number - (*(const pb_Field**)b)->number;
-}
-
-PB_API const pb_Field* pb_sortfield(pb_Type* t) {
-    if (!t->field_sort && t->field_count) {
-        pb_Field** list = malloc(sizeof(pb_Field*) * t->field_count);
-
-        int index = 0;
-        const pb_Field* f = NULL;
-        while (pb_nextfield(t, &f)) {
-            list[index++] = (pb_Field*)f;
-        }
-
-        qsort(list, index, sizeof(pb_Field*), comp_field);
-        t->field_sort = list;
-    }
-
-    return t->field_sort ? *t->field_sort : NULL;
 }
 
 /*

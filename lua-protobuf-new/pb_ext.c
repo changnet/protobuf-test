@@ -13,14 +13,15 @@ int Lext_encode(void* LS, lua_State* L, int index, pb_Buffer *b)
     luaL_checktype(L, index + 1, LUA_TTABLE);
 
     // lpb_encode要求栈顶必定得是要打包的数据
-    if (lua_gettop(L) != index + 1) return -1;
+    int top = lua_gettop(L);
+    if (top != index + 1) return -1;
 
     // argcheck(L, t != NULL, 1, "type '%s' does not exists", lua_tostring(L, 1));
 
     e.L = L, e.LS = LS, e.b = b;
     // 打包的数据，是写到了pb_Buffer *b = e->b;
 
-    lpb_encode(&e, t);
+    lpb_encode(&e, t, top);
 
     return 0;
 }

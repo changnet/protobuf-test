@@ -334,7 +334,7 @@ struct pb_Field {
 struct pb_Type {
     pb_Name    *name;
     const char *basename;
-    const pb_Field **field_sort;
+    pb_Field **field_sort;
     pb_Table field_tags;
     pb_Table field_names;
     pb_Table oneof_index;
@@ -1156,6 +1156,28 @@ PB_API const pb_Field *pb_field(const pb_Type *t, int32_t number) {
     pb_FieldEntry *fe = NULL;
     if (t != NULL) fe = (pb_FieldEntry*)pb_gettable(&t->field_tags, number);
     return fe ? fe->value : NULL;
+}
+
+
+static inline int comp_field(const void* a, const void* b) {
+    return (*(const pb_Field**)a)->number - (*(const pb_Field**)b)->number;
+}
+
+PB_API pb_Field** pb_sortfield(pb_Type* t) {
+    if (!t->field_sort && t->field_count) {
+        pb_Field** list = malloc(sizeof(pb_Field*) * t->field_count);
+
+        int index = 0;
+        const pb_Field* f = NULL;
+        while (pb_nextfield(t, &f)) {
+            list[index++] = (pb_Field*)f;
+        }
+
+        qsort(list, index, sizeof(pb_Field*), comp_field);
+        t->field_sort = list;
+    }
+
+    return t->field_sort;
 }
 
 PB_API const pb_Name *pb_oneofname(const pb_Type *t, int idx) {

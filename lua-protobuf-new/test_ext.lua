@@ -1,4 +1,4 @@
-local person
+
 local times = 100000
 
 local function dump(any)
@@ -19,47 +19,66 @@ local function dump(any)
     return "{" .. str .. "}"
 end
 
+local g_name = "ilse"
+local g_id = 18
+local g_email = "888888888@github.com"
+local g_phone = {
+         { type = 0, number = "12312341234" },
+         { type = 2,   number = "45645674567" }
+      }
+
+local g_person = {
+      name = g_name,
+      id  = g_id,
+      email = g_email,
+      phone = g_phone
+   }
+
 local function test()
     local encode = pb_ext.encode
     local decode = pb_ext.decode
 
-   local data = {
-      name = "ilse",
-      id  = 18,
-      email = "888888888@github.com",
-      phone = {
-         { type = 0, number = "12312341234" },
-         { type = 2,   number = "45645674567" }
-      }
-   }
-
     pb_ext.init()
     assert(pb.loadfile("addressbook.pb"))
     
-    pb_ext.encode_and_save("tutorial.Person", data)
+    pb_ext.encode_and_save("tutorial.Person", g_person)
 
     local beg_tm = os.clock ()
 
     for i = 1, times do
-        encode("tutorial.Person", data)
+        encode("tutorial.Person", g_person)
     end
 
     for i = 1, times do
-        person = decode("tutorial.Person")
+        g_person = decode("tutorial.Person")
     end
 
     -- ////////////////////////////////////////////////////
+    local pack = pb.pack_msg
+    local unpack = pb.unpack_msg
     local end_tm = os.clock()
-print(string.format("run %d times encode decode cost %.3fs", times, end_tm - beg_tm))	
+    print(string.format("run %d times encode decode cost %.3fs", times, end_tm - beg_tm))
+
+    local beg_tm = os.clock ()
+
+    for i = 1, times do
+        pack("tutorial.Person", g_name, g_id, g_email, g_phone)
+    end
+
+    -- for i = 1, times do
+    --     g_name, g_id, g_email, g_phone = unpack("tutorial.Person")
+    -- end
+
+    -- ////////////////////////////////////////////////////
+    local end_tm = os.clock()
+    print(string.format("run %d times pack unpack cost %.3fs", times, end_tm - beg_tm))
 end
-
-
 
 test()
 
+print(dump(g_person))
+print(g_name, g_id, g_email, g_phone)
 
-
-print(dump(person))
 -- print(dump({a = 1, b = 5, c = "sss"}))
 
 -- gcc -o test test.c pb.c -llua -ldl -lm
