@@ -1678,7 +1678,7 @@ static int lpb_pack_msg(lpb_Env* e, const pb_Type* t) {
     pb_Field** f = pb_sortfield((pb_Type*)t);
     for (unsigned i = 0; i < t->field_count; i++) {
         int idx = index + i;
-        if (!lua_isnil(L, idx)) {
+        if (!lua_isnoneornil(L, idx)) {
             lpb_encode_onefield(e, t, f[i], idx);
         }
     }

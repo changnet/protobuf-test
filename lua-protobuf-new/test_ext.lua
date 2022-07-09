@@ -37,40 +37,48 @@ local g_person = {
 local function test()
     local encode = pb_ext.encode
     local decode = pb_ext.decode
+    local person = g_person
 
     pb_ext.init()
     assert(pb.loadfile("addressbook.pb"))
     
-    pb_ext.encode_and_save("tutorial.Person", g_person)
+    pb_ext.encode_and_save("tutorial.Person", person)
 
     local beg_tm = os.clock ()
 
     for i = 1, times do
-        encode("tutorial.Person", g_person)
+        encode("tutorial.Person", person)
     end
 
     for i = 1, times do
-        g_person = decode("tutorial.Person")
+        person = decode("tutorial.Person")
     end
+
+    local end_tm = os.clock()
+    print(string.format("run %d times encode decode cost %.3fs", times, end_tm - beg_tm))
+
+    g_person = person
 
     -- ////////////////////////////////////////////////////
     local pack = pb.pack_msg
     local unpack = pb.unpack_msg
-    local end_tm = os.clock()
-    print(string.format("run %d times encode decode cost %.3fs", times, end_tm - beg_tm))
 
-    local beg_tm = os.clock ()
+    local name, id, email, phone =  g_name, g_id, g_email, g_phone
+
+    beg_tm = os.clock ()
 
     for i = 1, times do
-        pack("tutorial.Person", g_name, g_id, g_email, g_phone)
+        pack("tutorial.Person", name, id, email, phone)
     end
 
     -- for i = 1, times do
-    --     g_name, g_id, g_email, g_phone = unpack("tutorial.Person")
+    --     name, id, email, phone = unpack("tutorial.Person")
     -- end
 
+    -- g_name, g_id, g_email, g_phone = name, id, email, phone
+
     -- ////////////////////////////////////////////////////
-    local end_tm = os.clock()
+    end_tm = os.clock()
     print(string.format("run %d times pack unpack cost %.3fs", times, end_tm - beg_tm))
 end
 
