@@ -19,51 +19,87 @@ local function dump(any)
     return "{" .. str .. "}"
 end
 
-local g_name = "ilse"
-local g_id = 18
-local g_email = "888888888@github.com"
-local g_phone = {
+local function test()
+    local encode = pb.encode
+    local decode = pb.decode
+    local encode_c = pb_ext.encode
+    local decode_c = pb_ext.decode
+    local pack = pb.pack_msg
+    local unpack = pb.unpack_msg
+
+    local name = "ilse"
+    local id = 18
+    local email = "888888888@github.com"
+    local phone = {
          { type = 0, number = "12312341234" },
          { type = 2,   number = "45645674567" }
       }
 
-local g_person = {
-      name = g_name,
-      id  = g_id,
-      email = g_email,
-      phone = g_phone
-   }
-
-local function test()
-    local encode = pb_ext.encode
-    local decode = pb_ext.decode
-    local person = g_person
+    local person = {
+        name = name,
+        id  = id,
+        email = email,
+        phone = phone
+    }
 
     pb_ext.init()
     assert(pb.loadfile("addressbook.pb"))
     
     pb_ext.encode_and_save("tutorial.Person", person)
 
+    -- ////////////////////////////////////////////////////
+    local lua_buff = nil
+    local lua_person = nil
+
     local beg_tm = os.clock ()
 
     for i = 1, times do
-        encode("tutorial.Person", person)
+        lua_buff = encode("tutorial.Person", person)
     end
 
     for i = 1, times do
-        person = decode("tutorial.Person")
+        lua_person = decode("tutorial.Person", lua_buff)
     end
 
     local end_tm = os.clock()
-    print(string.format("run %d times encode decode cost %.3fs", times, end_tm - beg_tm))
-
-    g_person = person
+    print(string.format("run %d times pb with lua buffer encode decode cost %.3fs", times, end_tm - beg_tm))
 
     -- ////////////////////////////////////////////////////
-    local pack = pb.pack_msg
-    local unpack = pb.unpack_msg
+    local s_person
+    local b = pb_buffer.new()
 
-    local name, id, email, phone =  g_name, g_id, g_email, g_phone
+    encode("tutorial.Person", person, b)
+    local s = pb_slice.new(b:result())
+
+    beg_tm = os.clock ()
+
+    for i = 1, times do
+        encode("tutorial.Person", person, b)
+    end
+
+    for i = 1, times do
+        s_person = decode("tutorial.Person", s)
+    end
+
+    end_tm = os.clock()
+    print(string.format("run %d times pb with slice encode decode cost %.3fs", times, end_tm - beg_tm))
+
+    -- ////////////////////////////////////////////////////
+    local c_person
+    beg_tm = os.clock ()
+
+    for i = 1, times do
+        encode_c("tutorial.Person", person)
+    end
+
+    for i = 1, times do
+        c_person = decode_c("tutorial.Person")
+    end
+
+    end_tm = os.clock()
+    print(string.format("run %d times pb with c api encode decode cost %.3fs", times, end_tm - beg_tm))
+
+    -- ////////////////////////////////////////////////////
 
     beg_tm = os.clock ()
 
@@ -80,12 +116,17 @@ local function test()
     -- ////////////////////////////////////////////////////
     end_tm = os.clock()
     print(string.format("run %d times pack unpack cost %.3fs", times, end_tm - beg_tm))
+
+    print(dump(lua_person))
+    print("lua dump done >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print(dump(s_person))
+    print("lua slice done >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print(dump(c_person))
+    print("lua c api done >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print(name, id, email, dump(phone))
 end
 
 test()
-
-print(dump(g_person))
-print(g_name, g_id, g_email, g_phone)
 
 -- print(dump({a = 1, b = 5, c = "sss"}))
 
