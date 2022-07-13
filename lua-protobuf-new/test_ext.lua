@@ -75,6 +75,7 @@ local function test()
 
     for i = 1, times do
         encode("tutorial.Person", person, b)
+        b:reset() -- ?????
     end
 
     for i = 1, times do
@@ -100,20 +101,39 @@ local function test()
     print(string.format("run %d times pb with c api encode decode cost %.3fs", times, end_tm - beg_tm))
 
     -- ////////////////////////////////////////////////////
-    local u_b
+    local u_person
     beg_tm = os.clock ()
 
     for i = 1, times do
-        u_b = pack("tutorial.Person", name, id, email, phone)
+        u_person = pack("tutorial.Person", name, id, email, phone)
     end
 
     for i = 1, times do
-        name, id, email, phone = unpack("tutorial.Person", u_b)
+        name, id, email, phone = unpack("tutorial.Person", u_person)
     end
 
-    -- ////////////////////////////////////////////////////
     end_tm = os.clock()
     print(string.format("run %d times pack unpack cost %.3fs", times, end_tm - beg_tm))
+    -- ////////////////////////////////////////////////////
+    local ub = pb_buffer.new()
+
+    pack("tutorial.Person", ub, name, id, email, phone)
+    local us = pb_slice.new(ub:result())
+
+    beg_tm = os.clock ()
+
+    for i = 1, times do
+        pack("tutorial.Person", ub, name, id, email, phone)
+        ub:reset()
+    end
+
+    for i = 1, times do
+        name, id, email, phone = unpack("tutorial.Person", us)
+    end
+
+    end_tm = os.clock()
+    print(string.format("run %d times pack unpack slice cost %.3fs", times, end_tm - beg_tm))
+    -- ////////////////////////////////////////////////////
 
     print(dump(lua_person))
     print("lua dump done >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")

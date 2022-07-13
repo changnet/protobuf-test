@@ -1697,7 +1697,7 @@ static int Lpb_pack_msg(lua_State* L) {
     lpb_Env e;
 
     int idx = 3;
-    e.L = L, e.LS = LS, e.b = test_buffer(L, idx);
+    e.L = L, e.LS = LS, e.b = test_buffer(L, 2);
     if (e.b == NULL) {
         idx = 2;
         pb_resetbuffer(e.b = &LS->buffer);
@@ -1908,6 +1908,17 @@ static int Lpb_decode(lua_State *L) {
             lpb_checkslice(L, 2), 3);
 }
 
+void lpb_pushunpackdef(lua_State* L, lpb_State* LS, const pb_Type* t, pb_Field** l, int top) {
+    int mode = LS->default_mode;
+    mode = t->is_proto3 && mode == LPB_DEFDEF ? LPB_COPYDEF : mode;
+    if (mode != LPB_COPYDEF && mode != LPB_METADEF) return;
+
+    for (unsigned int i = 0; i < t->field_count; i++) {
+        if (lua_isnoneornil(L, top + i) && lpb_pushdeffield(L, LS, l[i], t->is_proto3)) {
+            lua_replace(L, top + i);
+        }
+    }
+}
 
 static int lpb_unpack_msg(lpb_Env* e, const pb_Type* t) {
     lua_State* L = e->L;
@@ -1915,16 +1926,19 @@ static int lpb_unpack_msg(lpb_Env* e, const pb_Type* t) {
     int top = lua_gettop(L);
     uint32_t tag;
     int last_index = 0;
+    unsigned int decode_count = 0;
+    unsigned int field_count = t->field_count;
 
-    pb_sortfield((pb_Type*)t);
-    lua_settop(L, top + t->field_count);
+    pb_Field **list = pb_sortfield((pb_Type*)t);
+    lua_settop(L, top + field_count);
 
-    luaL_checkstack(L, t->field_count * 2, "not enough stack space for fields");
+    luaL_checkstack(L, field_count * 2, "not enough stack space for fields");
 
     while (pb_readvarint32(s, &tag)) {
         const pb_Field* f = pb_field(t, pb_gettag(tag));
 
         if (last_index && (!f || f->sort_index != last_index)) {
+            decode_count++;
             lua_replace(L, top + last_index);
             last_index = 0;
         }
@@ -1952,11 +1966,16 @@ static int lpb_unpack_msg(lpb_Env* e, const pb_Type* t) {
     }
 
     if (last_index) {
+        decode_count++;
         lua_replace(L, top + last_index);
     }
 
+    if (decode_count != field_count) {
+        lpb_pushunpackdef(L, e->LS, t, list, top);
+    }
+
     if (e->LS->use_hooks) lpb_usedechooks(L, e->LS, t);
-    return t->field_count;
+    return field_count;
 }
 
 static int Lpb_unpack_msg(lua_State* L) {

@@ -1168,6 +1168,8 @@ PB_API pb_Field** pb_sortfield(pb_Type* t) {
     if (!t->field_sort && t->field_count) {
         pb_Field** list = malloc(sizeof(pb_Field*) * t->field_count);
 
+        assert(list);
+
         int index = 0;
         const pb_Field* f = NULL;
         while (pb_nextfield(t, &f)) {
@@ -1175,7 +1177,7 @@ PB_API pb_Field** pb_sortfield(pb_Type* t) {
         }
 
         qsort(list, index, sizeof(pb_Field*), comp_field);
-        for (int i = 0; i < t->field_count; i++) {
+        for (unsigned int i = 0; i < t->field_count; i++) {
             list[i]->sort_index = i + 1;
         }
         t->field_sort = list;
