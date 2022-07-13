@@ -100,18 +100,16 @@ local function test()
     print(string.format("run %d times pb with c api encode decode cost %.3fs", times, end_tm - beg_tm))
 
     -- ////////////////////////////////////////////////////
-
+    local u_b
     beg_tm = os.clock ()
 
     for i = 1, times do
-        pack("tutorial.Person", name, id, email, phone)
+        u_b = pack("tutorial.Person", name, id, email, phone)
     end
 
-    -- for i = 1, times do
-    --     name, id, email, phone = unpack("tutorial.Person")
-    -- end
-
-    -- g_name, g_id, g_email, g_phone = name, id, email, phone
+    for i = 1, times do
+        name, id, email, phone = unpack("tutorial.Person", u_b)
+    end
 
     -- ////////////////////////////////////////////////////
     end_tm = os.clock()
@@ -146,6 +144,13 @@ run 100000 times encode decode cost 0.264s
 
 256ms / 100000 ~= 0.00256ms
 
+测试用例
+1. pack unpack 基础测试
+2. pack unpack 带nil值
+3. 多层嵌套message
+4. map类型
+5. oneof类型
+6. 传入不符类型故意出错
 
 
 lua_error

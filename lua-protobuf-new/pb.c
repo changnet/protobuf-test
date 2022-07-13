@@ -1715,8 +1715,6 @@ static int Lpb_pack_msg(lua_State* L) {
         pb_resetbuffer(e.b);
     }
     return 1;
-
-    return 1;
 }
 
 
@@ -1856,12 +1854,12 @@ static void lpbD_repeated(lpb_Env *e, const pb_Field *f, uint32_t tag) {
 }
 
 int lpbD_message(lpb_Env *e, const pb_Type *t) {
-    lua_State *L = e->L;
-    pb_Slice *s = e->s;
+    lua_State* L = e->L;
+    pb_Slice* s = e->s;
     uint32_t tag;
     luaL_checkstack(L, t->field_count * 2, "not enough stack space for fields");
     while (pb_readvarint32(s, &tag)) {
-        const pb_Field *f = pb_field(t, pb_gettag(tag));
+        const pb_Field* f = pb_field(t, pb_gettag(tag));
         if (f == NULL)
             pb_skipvalue(s, tag);
         else if (f->type && f->type->is_map) {
@@ -1869,11 +1867,13 @@ int lpbD_message(lpb_Env *e, const pb_Type *t) {
             lpbD_checktype(e, f, tag);
             lpbD_map(e, f);
             lua_pop(L, 1);
-        } else if (f->repeated) {
+        }
+        else if (f->repeated) {
             lpb_fetchtable(e, f);
             lpbD_repeated(e, f, tag);
             lua_pop(L, 1);
-        } else {
+        }
+        else {
             lua_pushstring(L, (const char*)f->name);
             if (f->oneof_idx) {
                 lua_pushstring(L, (const char*)pb_oneofname(t, f->oneof_idx));
@@ -1908,8 +1908,67 @@ static int Lpb_decode(lua_State *L) {
             lpb_checkslice(L, 2), 3);
 }
 
+
+static int lpb_unpack_msg(lpb_Env* e, const pb_Type* t) {
+    lua_State* L = e->L;
+    pb_Slice* s = e->s;
+    int top = lua_gettop(L);
+    uint32_t tag;
+    int last_index = 0;
+
+    pb_sortfield((pb_Type*)t);
+    lua_settop(L, top + t->field_count);
+
+    luaL_checkstack(L, t->field_count * 2, "not enough stack space for fields");
+
+    while (pb_readvarint32(s, &tag)) {
+        const pb_Field* f = pb_field(t, pb_gettag(tag));
+
+        if (last_index && (!f || f->sort_index != last_index)) {
+            lua_replace(L, top + last_index);
+            last_index = 0;
+        }
+
+        if (f == NULL) {
+            pb_skipvalue(s, tag);
+            continue;
+        }
+
+        if (f->type && f->type->is_map) {
+            lpbD_checktype(e, f, tag);
+            lua_newtable(L);
+            lpbD_map(e, f);
+        }
+        else if (f->repeated) {
+            if (!last_index)
+                lua_newtable(L);
+
+            lpbD_repeated(e, f, tag);
+        }
+        else {
+            lpbD_field(e, f, tag);
+        }
+        last_index = f->sort_index;
+    }
+
+    if (last_index) {
+        lua_replace(L, top + last_index);
+    }
+
+    if (e->LS->use_hooks) lpb_usedechooks(L, e->LS, t);
+    return t->field_count;
+}
+
 static int Lpb_unpack_msg(lua_State* L) {
-    return 0;
+    lpb_State* LS = default_lstate(L);
+    const pb_Type* t = lpb_type(LS, lpb_checkslice(L, 1));
+    argcheck(L, t != NULL, 1, "type '%s' does not exists", lua_tostring(L, 1));
+
+    pb_Slice s = lpb_checkslice(L, 2);
+
+    lpb_Env e;
+    e.L = L, e.LS = LS, e.s = &s;
+    return lpb_unpack_msg(&e, t);
 }
 
 

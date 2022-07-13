@@ -324,6 +324,7 @@ struct pb_Field {
     pb_Type *type;
     pb_Name *default_value;
     int32_t  number;
+    int32_t  sort_index;
     unsigned oneof_idx : 24;
     unsigned type_id   : 5; /* PB_T* enum */
     unsigned repeated  : 1;
@@ -1174,6 +1175,9 @@ PB_API pb_Field** pb_sortfield(pb_Type* t) {
         }
 
         qsort(list, index, sizeof(pb_Field*), comp_field);
+        for (int i = 0; i < t->field_count; i++) {
+            list[i]->sort_index = i + 1;
+        }
         t->field_sort = list;
     }
 
