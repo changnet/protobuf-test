@@ -49,7 +49,7 @@ int lpbD_message(lpb_Env* e, const pb_Type* t);
 
 void lpb_pushtypetable(lua_State* L, lpb_State* LS, const pb_Type* t);
 
-inline void lpb_set_error(lua_State* L, const char* fmt, ...)
+static void lpb_set_error(lua_State* L, const char* fmt, ...)
 {
     va_list l;
     va_start(l, fmt);
@@ -59,7 +59,7 @@ inline void lpb_set_error(lua_State* L, const char* fmt, ...)
     lua_setglobal(L, pb_error_field);
 }
 
-inline int lpb_error(lua_State* L) {
+static int lpb_error(lua_State* L) {
     lua_getglobal(L, pb_error_field);
 
     lua_pushnil(L);

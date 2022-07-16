@@ -1596,10 +1596,10 @@ static void lpbE_map(lpb_Env *e, const pb_Field *f, int idx) {
 static void lpbE_repeated(lpb_Env *e, const pb_Field *f, int idx) {
     lua_State *L = e->L;
     pb_Buffer *b = e->b;
+    int top = lua_gettop(L);
     int i;
     lpb_checktable(L, f, idx);
 
-    int top = lua_gettop(L);
     if (f->packed) {
         size_t len, bufflen = pb_bufflen(b);
         pb_addvarint32(b, pb_pair(f->number, PB_TBYTES));
@@ -1632,9 +1632,10 @@ static void lpb_encode_onefield(lpb_Env *e, const pb_Type *t, const pb_Field *f,
 
 void lpb_encode(lpb_Env *e, const pb_Type *t, int idx) {
     lua_State *L = e->L;
+    int top = lua_gettop(L);
+
     luaL_checkstack(L, 3, "message too many levels");
 
-    int top = lua_gettop(L);
     if (e->LS->encode_order) {
         const pb_Field *f = NULL;
         while (pb_nextfield(t, &f)) {
@@ -1676,11 +1677,11 @@ static int Lpb_encode(lua_State *L) {
 }
 
 static int lpb_pack_msg(lpb_Env* e, const pb_Type* t, int idx) {
-    int index = 2;
+    unsigned i;
     lua_State* L = e->L;
 
     pb_Field** f = pb_sortfield((pb_Type*)t);
-    for (unsigned i = 0; i < t->field_count; i++) {
+    for (i = 0; i < t->field_count; i++) {
         int index = idx + i;
         if (!lua_isnoneornil(L, index)) {
             lpb_encode_onefield(e, t, f[i], index);
@@ -1702,9 +1703,6 @@ static int Lpb_pack_msg(lua_State* L) {
         idx = 2;
         pb_resetbuffer(e.b = &LS->buffer);
     }
-
-    //lua_pushvalue(L, 2);
-    //lpb_useenchooks(L, e.LS, t);
 
     lpb_pack_msg(&e, t, idx);
 
@@ -1909,11 +1907,12 @@ static int Lpb_decode(lua_State *L) {
 }
 
 void lpb_pushunpackdef(lua_State* L, lpb_State* LS, const pb_Type* t, pb_Field** l, int top) {
+    unsigned int i;
     int mode = LS->default_mode;
     mode = t->is_proto3 && mode == LPB_DEFDEF ? LPB_COPYDEF : mode;
     if (mode != LPB_COPYDEF && mode != LPB_METADEF) return;
 
-    for (unsigned int i = 0; i < t->field_count; i++) {
+    for (i = 0; i < t->field_count; i++) {
         if (lua_isnoneornil(L, top + i) && lpb_pushdeffield(L, LS, l[i], t->is_proto3)) {
             lua_replace(L, top + i);
         }

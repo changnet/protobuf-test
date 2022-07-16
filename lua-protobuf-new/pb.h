@@ -1160,24 +1160,24 @@ PB_API const pb_Field *pb_field(const pb_Type *t, int32_t number) {
 }
 
 
-static inline int comp_field(const void* a, const void* b) {
+static int comp_field(const void* a, const void* b) {
     return (*(const pb_Field**)a)->number - (*(const pb_Field**)b)->number;
 }
 
 PB_API pb_Field** pb_sortfield(pb_Type* t) {
     if (!t->field_sort && t->field_count) {
+        int index = 0;
+        unsigned int i = 0;
+        const pb_Field* f = NULL;
         pb_Field** list = malloc(sizeof(pb_Field*) * t->field_count);
 
         assert(list);
-
-        int index = 0;
-        const pb_Field* f = NULL;
         while (pb_nextfield(t, &f)) {
             list[index++] = (pb_Field*)f;
         }
 
         qsort(list, index, sizeof(pb_Field*), comp_field);
-        for (unsigned int i = 0; i < t->field_count; i++) {
+        for (i = 0; i < t->field_count; i++) {
             list[i]->sort_index = i + 1;
         }
         t->field_sort = list;
