@@ -1,5 +1,7 @@
 #!/bin/sh
 
+TESTPWD=`pwd`
+
 echo "run debug pbc test"
 cd pbc
 protoc -o addressbook.pb addressbook.proto
@@ -18,7 +20,7 @@ cd ..
 ./pbctest
 
 echo "run debug lua-protobuf test"
-cd ../lua-protobuf
+cd $TESTPWD/lua-protobuf
 protoc -o addressbook.pb addressbook.proto
 gcc -g -o test test.c pb.c -llua -ldl -lm
 ./test
@@ -28,7 +30,7 @@ gcc -O3 -DNDEBUG -o test test.c pb.c -llua -ldl -lm
 ./test
 
 echo "run debug protolua test"
-cd ../protolua
+cd $TESTPWD/protolua
 cd thirdparty
 git clone https://github.com/google/protobuf.git
 cd ..
@@ -45,7 +47,7 @@ cd protolua
 ./protolua
 
 echo "run debug lua-protobuf-new test"
-cd ../lua-protobuf-new
+cd $TESTPWD/lua-protobuf-new
 protoc -o addressbook.pb addressbook.proto
 gcc -g -o test test.c pb.c pb_ext.c -llua -ldl -lm
 ./test

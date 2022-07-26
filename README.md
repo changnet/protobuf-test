@@ -13,6 +13,9 @@
 1. 调整protolua目录为一个测试用例
 2. 删掉一些第三方依赖
 
+* [lua-protobuf-new](https://github.com/changnet/lua-protobuf)
+和`lua-protobuf`基本一致，只是增加了一些测试接口，如pack unpack，后续可能会合并到`lua-protobuf`
+
 ## 测试环境
 * VirtualBox Debian 10
 * GCC 8.3.0-6
@@ -46,6 +49,25 @@ run 100000 times encode decode cost 2.841s
 run release protolua test
 run 100000 times encode decode cost 0.743s
 {name = "ilse",email = "888888888@github.com",phone = {1 = {type = 0,number = "12312341234"},2 = {type = 2,number = "45645674567"}},id = 18}
+
+run 100000 times encode decode cost 0.737s
+{name = "ilse",email = "888888888@github.com",id = 18,phone = {1 = {type = 0,number = "12312341234"},2 = {type = 2,number = "45645674567"}}}
+run debug lua-protobuf-new test
+run 100000 times pb with lua buffer encode decode cost 0.404s
+run 100000 times pb with slice encode decode cost 0.396s
+run 100000 times pb with c api encode decode cost 0.384s
+run 100000 times pack unpack cost 0.352s
+run 100000 times pack unpack slice cost 0.356s
+run 100000 times pack unpack c api cost 0.354s
+
+run release lua-protobuf-new test
+run 100000 times pb with lua buffer encode decode cost 0.265s
+run 100000 times pb with slice encode decode cost 0.263s
+run 100000 times pb with c api encode decode cost 0.253s
+run 100000 times pack unpack cost 0.237s
+run 100000 times pack unpack slice cost 0.237s
+run 100000 times pack unpack c api cost 0.226s
+
 ```
 
 ## 简单总结

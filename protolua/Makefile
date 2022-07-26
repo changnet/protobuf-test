@@ -170,6 +170,19 @@ protolua/fast:
 .PHONY : protolua/fast
 
 #=============================================================================
+# Target rules for targets named lua-5.3.5
+
+# Build rule for target.
+lua-5.3.5: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 lua-5.3.5
+.PHONY : lua-5.3.5
+
+# fast build rule for target.
+lua-5.3.5/fast:
+	$(MAKE) -f thirdparty/lua-5.3.5/CMakeFiles/lua-5.3.5.dir/build.make thirdparty/lua-5.3.5/CMakeFiles/lua-5.3.5.dir/build
+.PHONY : lua-5.3.5/fast
+
+#=============================================================================
 # Target rules for targets named libprotobuf
 
 # Build rule for target.
@@ -208,6 +221,7 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... protolua"
+	@echo "... lua-5.3.5"
 	@echo "... libprotobuf"
 	@echo "... libprotobuf-lite"
 .PHONY : help
