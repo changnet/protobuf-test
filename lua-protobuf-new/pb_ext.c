@@ -91,15 +91,50 @@ int encode_and_save(lua_State* L)
 
 int pack_and_save(lua_State* L)
 {
+    lpb_State* LS = __LS;
+    const pb_Type* t = lpb_type(LS, lpb_checkslice(L, 1));
+
+    lpb_Env e;
+
+    e.L = L, e.LS = LS;
+    pb_resetbuffer(e.b = &LS->buffer);
+
+    lpb_pack_msg(&e, t, 2);
+
+    const char* b = pb_buffer(&LS->buffer);
+    len = pb_bufflen(&LS->buffer);
+
+    memcpy(buff, b, len);
+
+    lua_pushinteger(L, len);
     return 1;
 }
 
 int pack_test(lua_State* L)
 {
+    lpb_State* LS = __LS;
+    const pb_Type* t = lpb_type(LS, lpb_checkslice(L, 1));
+
+    lpb_Env e;
+
+    e.L = L, e.LS = LS;
+    pb_resetbuffer(e.b = &LS->buffer);
+
+    lpb_pack_msg(&e, t, 2);
+
+    return 0;
 }
 
 int unpack_test(lua_State* L)
 {
+    lpb_State* LS = __LS;
+    const pb_Type* t = lpb_type(LS, lpb_checkslice(L, 1));
+
+    pb_Slice s = pb_lslice(buff, len);
+
+    lpb_Env e;
+    e.L = L, e.LS = LS, e.s = &s;
+    return lpb_unpack_msg(&e, t);
 }
 
 int luaopen_pbext(lua_State* L)

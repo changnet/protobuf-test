@@ -1662,7 +1662,7 @@ static int Lpb_encode(lua_State *L) {
     return 1;
 }
 
-static int lpb_pack_msg(lpb_Env* e, const pb_Type* t, int idx) {
+int lpb_pack_msg(lpb_Env* e, const pb_Type* t, int idx) {
     unsigned i;
     lua_State* L = e->L;
 
@@ -1907,7 +1907,7 @@ void lpb_pushunpackdef(lua_State* L, lpb_State* LS, const pb_Type* t, pb_Field**
     }
 }
 
-static int lpb_unpack_msg(lpb_Env* e, const pb_Type* t) {
+int lpb_unpack_msg(lpb_Env* e, const pb_Type* t) {
     lua_State* L = e->L;
     pb_Slice* s = e->s;
     int top = lua_gettop(L);

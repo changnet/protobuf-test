@@ -26,6 +26,8 @@ local function test()
     local decode_c = pb_ext.decode
     local pack = pb.pack_msg
     local unpack = pb.unpack_msg
+    local pack_c = pb_ext.pack
+    local unpack_c = pb_ext.unpack
 
     local name = "ilse"
     local id = 18
@@ -134,14 +136,32 @@ local function test()
     end_tm = os.clock()
     print(string.format("run %d times pack unpack slice cost %.3fs", times, end_tm - beg_tm))
     -- ////////////////////////////////////////////////////
+    local name_uc, id_uc, email_uc, phone_uc
+    pb_ext.pack_and_save("tutorial.Person", name, id, email, phone)
+
+    beg_tm = os.clock ()
+    for i = 1, times do
+        pack_c("tutorial.Person", name, id, email, phone)
+    end
+
+    for i = 1, times do
+        name_uc, id_uc, email_uc, phone_uc = unpack_c("tutorial.Person")
+    end
+
+    end_tm = os.clock()
+    print(string.format("run %d times pack unpack c api cost %.3fs", times, end_tm - beg_tm))
+    -- ////////////////////////////////////////////////////
 
     print(dump(lua_person))
     print("lua dump done >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     print(dump(s_person))
-    print("lua slice done >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print("slice done >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     print(dump(c_person))
-    print("lua c api done >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print("c api done >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     print(name, id, email, dump(phone))
+    print("pack unpack done >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    print(name_uc, id_uc, email_uc, dump(phone_uc))
+    print("pack unapck c api done >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 end
 
 test()

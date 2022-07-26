@@ -50,6 +50,9 @@ int lpbD_message(lpb_Env* e, const pb_Type* t);
 
 void lpb_pushtypetable(lua_State* L, lpb_State* LS, const pb_Type* t);
 
+int lpb_pack_msg(lpb_Env* e, const pb_Type* t, int idx);
+int lpb_unpack_msg(lpb_Env* e, const pb_Type* t);
+
 static void lpb_set_error(lua_State* L, const char* fmt, ...)
 {
     va_list l;

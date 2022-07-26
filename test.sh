@@ -43,3 +43,14 @@ cmake . -DCMAKE_BUILD_TYPE=Release
 make
 cd protolua
 ./protolua
+
+echo "run debug lua-protobuf-new test"
+cd ../lua-protobuf-new
+protoc -o addressbook.pb addressbook.proto
+gcc -g -o test test.c pb.c pb_ext.c -llua -ldl -lm
+./test
+
+echo "run release lua-protobuf-new test"
+gcc -O3 -o test test.c pb.c pb_ext.c -llua -ldl -lm
+./test
+
