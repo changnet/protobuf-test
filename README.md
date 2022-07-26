@@ -81,3 +81,5 @@ lua table，而是通过元表在访问对应的字段时解析，新实现的�
 
 `pbc`和`lua-protobuf`的效率都比较高，不相上下。Debug版通过`pbc`要快一点点，但`Release`版`lua-protobuf`要快。而`protolua`的Debug版性能非常差，即使是
 Release版，耗时也是前2个库的2倍左右。
+
+`lua-protobuf-new`采用`pack unpack`模式，有10%的效率提升，在另一台比较差的机子上，则有20%。这个比较是在encode只构建一次table的情况下
