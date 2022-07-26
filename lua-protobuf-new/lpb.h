@@ -10,6 +10,7 @@
 
 PB_NS_BEGIN
 
+
 typedef struct lpb_State {
     const pb_State* state;
     pb_State  local;
@@ -18,9 +19,10 @@ typedef struct lpb_State {
     int defs_index;
     int enc_hooks_index;
     int dec_hooks_index;
-    unsigned use_hooks : 1; /* lpb_Int64Mode */
+    unsigned use_dec_hooks : 1;
+    unsigned use_enc_hooks : 1;
     unsigned enum_as_value : 1;
-    unsigned default_mode : 2; /* lpb_DefMode */
+    unsigned encode_mode : 2; /* lpb_EncodeMode */
     unsigned int64_mode : 2; /* lpb_Int64Mode */
     unsigned encode_default_values : 1;
     unsigned decode_default_array : 1;
@@ -37,9 +39,8 @@ typedef struct lpb_Env {
 
 #define pb_error_field "__pb_last_strerror"
 
-lpb_State* default_lstate(lua_State* L);
-
-void lpb_encode(lpb_Env* e, const pb_Type* t, int idx);
+lpb_State* lpb_lstate(lua_State* L);
+void lpbE_encode(lpb_Env* e, const pb_Type* t, int idx);
 
 const pb_Type* lpb_type(lpb_State* LS, pb_Slice s);
 

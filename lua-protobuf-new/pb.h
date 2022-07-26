@@ -1277,7 +1277,7 @@ PB_API void pb_deltype(pb_State *S, pb_Type *t) {
     pb_freetable(&t->oneof_index);
     t->oneof_field = 0, t->field_count = 0;
     t->is_dead = 1;
-    free((void *)t->field_sort);
+    free(t->field_sort);
     t->field_sort = NULL;
     /*pb_delname(S, t->name); */
     /*pb_poolfree(&S->typepool, t); */

@@ -21,7 +21,7 @@ int Lext_encode(void* LS, lua_State* L, int index, pb_Buffer *b)
     e.L = L, e.LS = LS, e.b = b;
     // 打包的数据，是写到了pb_Buffer *b = e->b;
 
-    lpb_encode(&e, t, top);
+    lpbE_encode(&e, t, top);
 
     return 0;
 }
@@ -47,7 +47,7 @@ static char buff[10240];
 
 int init(lua_State* L)
 {
-    __LS = default_lstate(L);
+    __LS = lpb_lstate(L);
     return 0;
 }
 
@@ -89,6 +89,19 @@ int encode_and_save(lua_State* L)
     return 1;
 }
 
+int pack_and_save(lua_State* L)
+{
+    return 1;
+}
+
+int pack_test(lua_State* L)
+{
+}
+
+int unpack_test(lua_State* L)
+{
+}
+
 int luaopen_pbext(lua_State* L)
 {
     luaL_Reg libs[] = {
@@ -96,6 +109,9 @@ int luaopen_pbext(lua_State* L)
         {"encode_and_save", encode_and_save},
         { "encode", encode_test },
         { "decode", decode_test },
+        {"pack_and_save", pack_and_save},
+        { "pack", pack_test },
+        { "unpack", unpack_test },
         { NULL, NULL }
     };
     luaL_newlib(L, libs);
