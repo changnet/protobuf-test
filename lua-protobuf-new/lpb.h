@@ -39,12 +39,12 @@ typedef struct lpb_Env {
 
 #define pb_error_field "__pb_last_strerror"
 
-lpb_State* lpb_lstate(lua_State* L);
+LUALIB_API lpb_State* lpb_lstate(lua_State* L);
 void lpbE_encode(lpb_Env* e, const pb_Type* t, int idx);
 
-const pb_Type* lpb_type(lpb_State* LS, pb_Slice s);
+LUALIB_API const pb_Type* lpb_type(lpb_State* LS, pb_Slice s);
 
-pb_Slice lpb_checkslice(lua_State* L, int idx);
+LUALIB_API pb_Slice lpb_checkslice(lua_State* L, int idx);
 
 int lpbD_message(lpb_Env* e, const pb_Type* t);
 
