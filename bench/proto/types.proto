@@ -1,0 +1,24 @@
+// 标量类型与 enum 覆盖专项
+
+syntax = "proto3";
+package game;
+
+enum EntityState
+{
+    IDLE = 0;
+    MOVE = 1;
+    DEAD = 2;
+}
+
+message TypedPacket
+{
+    int64 pid = 1;
+    int32 hp = 2;
+    bool alive = 3;
+    float speed = 4;
+    double money = 5;
+    bytes payload = 6;
+    EntityState state = 7;
+    repeated int32 ids = 8;
+    repeated string tags = 9;
+}

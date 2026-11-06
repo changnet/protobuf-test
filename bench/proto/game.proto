@@ -1,0 +1,58 @@
+// 游戏服务器典型通信协议（proto3）
+// 覆盖：极小包、登录小包、高频位置同步小包、repeated 嵌套的中等包
+
+syntax = "proto3";
+package game;
+
+message Vec3
+{
+    float x = 1;
+    float y = 2;
+    float z = 3;
+}
+
+// 心跳：服务器最小、最高频的包之一
+message Heartbeat
+{
+    int64 time = 1;
+    int32 seq = 2;
+}
+
+// 登录请求：带字符串与嵌套子消息的小包
+message LoginReq
+{
+    int32 sid = 1;
+    int64 time = 2;
+    string account = 3;
+    string token = 4;
+    int32 version = 5;
+    Vec3 pos = 6;
+    repeated int32 flags = 7;
+}
+
+// 位置同步：游戏服每秒数万次的高频小包
+message MoveSync
+{
+    int64 time = 1;
+    int32 entity_id = 2;
+    Vec3 pos = 3;
+    float dir = 4;
+    int32 state = 5;
+    repeated int32 keys = 6;
+}
+
+message Item
+{
+    int32 id = 1;
+    int32 num = 2;
+    int64 expire = 3;
+    string name = 4;
+}
+
+// 背包更新：repeated 嵌套消息的中等包
+message BagUpdate
+{
+    int64 pid = 1;
+    int32 reason = 2;
+    repeated Item items = 3;
+}

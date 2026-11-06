@@ -1,0 +1,49 @@
+
+Ï
+player.protoplayer
+comm.proto"p
+CLogin
+sid (Rsid
+time (Rtime
+pfid (Rpfid
+sign (	Rsign
+account (	Raccount"u
+SLogin'
+list (2.player.SLogin.RoleRlist
+errno (Rerrno,
+Role
+pid (Rpid
+name (	Rname"!
+CCreateRole
+name (	Rname"I
+SCreateRole
+pid (Rpid
+name (	Rname
+errno (Rerrno"
+
+CEnterGame
+pid (Rpid"
+SKick
+reason (Rreason"w
+SBase
+create_time (R
+createTime
+server_time (R
+serverTime
+pp_int (RppInt
+pp_str (	RppStr"
+CEnterDungeon
+id (Rid"
+CPing
+verify (	Rverify"Å
+SPing,
+delay (2.player.SPing.SrvDelayRdelay
+verify (	Rverify2
+SrvDelay
+name (	Rname
+time (Rtime"3
+MoneyUpdate
+type (Rtype
+num (Rnum"4
+	MoneyInfo'
+list (2.player.MoneyUpdateRlistbproto3

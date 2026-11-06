@@ -1,0 +1,24 @@
+// proto3 map 支持专项（pbc 与 lua-protobuf 的 kv 语义对比）
+
+syntax = "proto3";
+package game;
+
+// map 的 value 可以是 message；放在前面保证 protoc.lua 能解析类型名
+// 名字不能叫 Item：game.proto 已经定义了 game.Item，同名会覆盖已有 schema
+message MapItem
+{
+    int32 id = 1;
+    string name = 2;
+}
+
+// 玩家属性表：业务里最常用 map 的场景
+message PlayerAttr
+{
+    int64 pid = 1;
+    string name = 2;
+    map<int32, int64> attrs = 3;
+    map<string, string> extras = 4;
+    map<bool, int32> flags = 5;
+    map<string, MapItem> items = 6;
+    map<int32, int32> zeros = 7; // key / value 都是 proto3 默认值
+}

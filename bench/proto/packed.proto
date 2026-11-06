@@ -1,0 +1,19 @@
+// proto3 默认 packed 的标量类型覆盖
+// 用于验证优化后 pbc 对 repeated 数值/布尔字段按 proto3 语义 packed 编码，
+// 且与 lua-protobuf 的 wire 双向互通（含 fixed32/float 的 4 字节步长）
+
+syntax = "proto3";
+package game;
+
+message PackedTypes
+{
+    repeated int32    ints      = 1;
+    repeated sint32   sints     = 2;
+    repeated uint32   uints     = 3;
+    repeated int64    bigs      = 4;
+    repeated fixed32  fixed32s  = 5;
+    repeated sfixed32 sfixed32s = 6;
+    repeated float    floats    = 7;
+    repeated double   doubles   = 8;
+    repeated bool     bools     = 9;
+}
